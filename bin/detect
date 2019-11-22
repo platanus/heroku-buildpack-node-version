@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+BUILD_DIR=$1
+
+if [ -f $BUILD_DIR/package.json ] \
+  && [ -f $BUILD_DIR/.node-version ]; then
+  echo "Node version"
+  exit 0
+else
+  exit 1
+fi

@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+BUILD_DIR=$1
+CACHE_DIR=$2
+
+mkdir -p $CACHE_DIR
+
+if ! [ -f $CACHE_DIR/jq ]; then
+  echo "-----> jq not found, downloading..."
+  wget -O $CACHE_DIR/jq "https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64"
+  chmod +x $CACHE_DIR/jq
+  echo "-----> jq dowloaded"
+fi
+
+cd $BUILD_DIR || exit
+
+echo "-----> Getting Node version from .node-version file"
+NODE_VERSION=$(cat .node-version)
+echo "-----> Found Node version: $NODE_VERSION"
+
+IFS='.' read -ra ADDR <<< "$NODE_VERSION"
+LENGTH=${#ADDR[@]}
+
+NODE_VERSION_PATCHED=$NODE_VERSION
+if [ $LENGTH -lt 3 ]; then
+    NODE_VERSION_PATCHED="$NODE_VERSION.x"
+fi
+
+echo "-----> Adding Node version to package.json: $NODE_VERSION_PATCHED"
+$CACHE_DIR/jq ".engines.node = \"$NODE_VERSION_PATCHED\"" package.json > package.tmp
+mv package.tmp package.json
